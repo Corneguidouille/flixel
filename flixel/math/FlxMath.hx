@@ -222,6 +222,109 @@ class FlxMath
 	{
 		return pointX >= rect.x && pointX <= rect.right && pointY >= rect.y && pointY <= rect.bottom;
 	}
+
+	/**
+	 * Returns true if the given x/y coordinate is within the given polygon
+	 * 
+	 * @param	pointX		The X value to test
+	 * @param	pointY		The Y value to test
+	 * @param	polygon		The FlxPolygon to test within
+	 * @return	true if pointX/pointY is within the FlxPolygon, otherwise false
+	 */
+	public static function pointInFlxPolygon(pointX:Float, pointY:Float, polygon:FlxPolygon):Bool
+	{
+		var points:Array<FlxPoint> = polygon.points;
+
+		var i:Int = 0;
+		var size:Int = points.length;
+		var point:FlxPoint = FlxPoint.get();
+		
+		while (i < size)
+		{
+			var p1:FlxPoint = points[i];
+			var p2:FlxPoint = points[(i + 1) % size];
+			
+			point.set(pointX, pointY);
+			if (isPointAtLeftOfTheLine(p1, p2, point))
+				return false;
+
+			++i;
+		}
+
+		return true;
+	}
+	
+	#if !FLX_NO_MOUSE
+	/**
+	 * Returns true if the mouse world x/y coordinate are within the given polygon
+	 * 
+	 * @param	useWorldCoords	If true the world x/y coordinates of the mouse will be used, otherwise screen x/y
+	 * @param	polygon			The FlxPolygon to test within. If this is null for any reason this function always returns true.
+	 * 
+	 * @return	true if mouse is within the FlxPolygon, otherwise false
+	 */
+	public static function mouseInFlxPolygon(useWorldCoords:Bool, polygon:FlxPolygon):Bool
+	{
+		if (polygon == null)
+		{
+			return true;
+		}
+		
+		if (useWorldCoords)
+		{
+			return pointInFlxPolygon(Math.floor(FlxG.mouse.x), Math.floor(FlxG.mouse.y), polygon);
+		}
+		else
+		{
+			return pointInFlxPolygon(FlxG.mouse.screenX, FlxG.mouse.screenY, polygon);
+		}
+	}
+	#end
+	
+	private static function isPointAtRightOfTheLine(a:FlxPoint, b:FlxPoint, p:FlxPoint):Bool
+	{
+		var determinant:Float = getDeterminantPoint(a, b, p);
+
+		if (determinant > 0)
+			return true;
+		return false;
+	}
+
+	private static function isPointAtLeftOfTheLine(a:FlxPoint, b:FlxPoint, p:FlxPoint):Bool
+	{
+		var determinant:Float = getDeterminantPoint(a, b, p);
+
+		if (determinant < 0)
+			return true;
+		return false;
+	}
+
+	private static function isPointOnTheLine(a:FlxPoint, b:FlxPoint, p:FlxPoint):Bool
+	{
+		var determinant:Float = getDeterminantPoint(a, b, p);
+
+		if (determinant == 0)
+			return true;
+		return false;
+	}
+
+	private static function getDeterminantPoint(a:FlxPoint, b:FlxPoint, p:FlxPoint):Float
+	{
+		var u:FlxVector = FlxVector.get();
+		u.x = b.x - a.x;
+		u.y = b.y - a.y;
+
+		var v:FlxVector = FlxVector.get();
+		v.x = p.x - a.x;
+		v.y = p.y - a.y;
+
+		return getDeterminantVector(u, v);
+	}
+
+	private static function getDeterminantVector(u:FlxVector, v:FlxVector):Float
+	{
+		return u.x*v.y - u.y*v.x;
+	}
 	
 	/**
 	 * Adds the given amount to the value, but never lets the value
