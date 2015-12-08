@@ -524,6 +524,64 @@ class FlxTypedGroup<T:FlxBasic> extends FlxBasic
 		return null;
 	}
 	
+	public function indexOf(Object:T):Int
+	{
+		if (members == null)
+			return -1;
+		
+		var index:Int = members.indexOf(Object);
+
+		return index;
+	}
+	
+	public function countNotNull():Int
+	{
+		var i:Int = 0;
+		var count:Int = 0;
+		var basic:FlxBasic = null;
+		
+		while (i < length)
+		{
+			basic = members[i++];
+			
+			if (count < 0)
+			{
+				count = 0;
+			}
+
+			if (basic != null)
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+
+	public function countNull():Int
+	{
+		var i:Int = 0;
+		var count:Int = 0;
+		var basic:FlxBasic = null;
+		
+		while (i < length)
+		{
+			basic = members[i++];
+			
+			if (count < 0)
+			{
+				count = 0;
+			}
+
+			if (basic == null)
+			{
+				count++;
+			}
+		}
+		
+		return count;
+	}
+	
 	/**
 	 * Call this function to find out how many members of the group are not dead.
 	 * 
